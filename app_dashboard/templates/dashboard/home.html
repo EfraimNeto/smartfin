@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block conteudo %}
+    <div class="card">
+        <h3 style="margin: 10px; text-align: center">Próximos Pagamentos a vencer</h3>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data de Vencimento</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pagamento in pagamentos %}
+                        <tr>
+                            <td>{{ pagamento.fornecedor }}</td>
+                            <td>{{ pagamento.descricao }}</td>
+                            <td>{{ pagamento.valor }}</td>
+                            <td>{{ pagamento.data_vencimento }}</td>
+                            <td>{{ pagamento.get_status_display }}</td>
+                            
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'pagamentos' %}" class="btn btn-primary mb-3-3">
+                <span class="fas fa-plus mr-1"></span>
+                Ver todos
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin: 10px; text-align: center">Próximos recebimentos a vencer</h3>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data de Vencimento</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recebimento in recebimentos %}
+                        <tr>
+                            <td>{{ recebimento.cliente }}</td>
+                            <td>{{ recebimento.descricao }}</td>
+                            <td>{{ recebimento.valor }}</td>
+                            <td>{{ recebimento.data_vencimento }}</td>
+                            <td>{{ recebimento.get_status_display }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'recebimentos' %}" class="btn btn-primary mb-3-3 ">
+                <span class="fas fa-plus mr-1"></span>
+                Ver todos
+            </a>
+        </div>
+        </div>
+    </div>
+{% endblock %}
