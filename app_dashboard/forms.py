@@ -16,8 +16,7 @@ class FornecedorForm(forms.ModelForm):
             'bairro', 
             'cidade', 
             'estado',
-            'loja',
-            'centro_custo'
+            'loja'
         ]
 
 class EditFornecedorForm(forms.ModelForm):
@@ -33,8 +32,7 @@ class EditFornecedorForm(forms.ModelForm):
             'bairro', 
             'cidade', 
             'estado',
-            'loja',
-            'centro_custo'
+            'loja'
         ]
 
 
@@ -85,8 +83,7 @@ class clientesForm(forms.ModelForm):
             'bairro', 
             'cidade', 
             'estado',
-            'loja',
-            'centro_custo'
+            'loja'
         ]
 
 class EditclientesForm(forms.ModelForm):
@@ -102,8 +99,7 @@ class EditclientesForm(forms.ModelForm):
             'bairro', 
             'cidade', 
             'estado',
-            'loja',
-            'centro_custo'
+            'loja'
         ]
 
 
@@ -119,13 +115,15 @@ class RecebimentoForm(forms.ModelForm):
 
 
 class EditRecebimentoForm(forms.ModelForm):
+    cliente = forms.ModelChoiceField(queryset=Cliente.objects.all(), empty_label="Selecione um Fornecedor")
 
     class Meta:
         model = Recebimento
         fields = '__all__'
         widgets = {
             'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'data_recebimento': forms.DateInput(attrs={'type': 'date'})
+            'data_recebimento': forms.DateInput(attrs={'type': 'date'}),
+            'valor': forms.NumberInput(attrs={'step': '0.01'}),  # Configuração para campos decimais
         }
 
 class PagamentoForm(forms.ModelForm):
@@ -140,11 +138,13 @@ class PagamentoForm(forms.ModelForm):
 
 
 class EditPagamentoForm(forms.ModelForm):
+    fornecedor = forms.ModelChoiceField(queryset=Fornecedor.objects.all(), empty_label="Selecione um Fornecedor")
 
     class Meta:
         model = Pagamento
         fields = '__all__'
         widgets = {
             'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
-            'data_pagamento': forms.DateInput(attrs={'type': 'date'})
+            'data_pagamento': forms.DateInput(attrs={'type': 'date'}),
+            'valor': forms.NumberInput(attrs={'step': '0.01'}),  # Configuração para campos decimais
         }

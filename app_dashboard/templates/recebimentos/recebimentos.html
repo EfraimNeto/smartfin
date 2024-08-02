@@ -45,6 +45,10 @@
 .text-danger {
     color: #dc3545; /* Vermelho */
 }
+/* Adiciona rolagem horizontal para tabelas em telas pequenas */
+.table-responsive {
+    overflow-x: auto;
+}
     </style>
     <!-- Formulário de Filtro -->
     <form method="GET" action="{% url 'recebimentos' %}">
@@ -72,22 +76,23 @@
                 <label for="centro_custo" style="text-transform: uppercase;">Centro de Custo</label>
                 <select class="form-control" id="centro_custo" name="centro_custo">
                     <option value="">Todos</option>
-                    <option value="Locação" {% if centro_custo_filter == 'Locação' %}selected{% endif %}>Locação</option>
-                    <option value="Sistema" {% if centro_custo_filter == 'Sistema' %}selected{% endif %}>Sistema</option>
-                    <option value="Folha de Pagamento" {% if centro_custo_filter == 'Folha de Pagamento' %}selected{% endif %}>Folha de Pagamento</option>
-                    <option value="Participação dos Lucros" {% if centro_custo_filter == 'Participação dos Lucros' %}selected{% endif %}>Participação dos Lucros</option>
-                    <option value="Tarifa" {% if centro_custo_filter == 'Tarifa' %}selected{% endif %}>Tarifa</option>
-                    <option value="Empréstimos" {% if centro_custo_filter == 'Empréstimos' %}selected{% endif %}>Empréstimos</option>
-                    <option value="Investimentos" {% if centro_custo_filter == 'Investimentos' %}selected{% endif %}>Investimentos</option>
-                    <option value="Campanha" {% if centro_custo_filter == 'Campanha' %}selected{% endif %}>Campanha</option>
-                    <option value="Comissão" {% if centro_custo_filter == 'Comissão' %}selected{% endif %}>Comissão</option>
                     <option value="Antecipação" {% if centro_custo_filter == 'Antecipação' %}selected{% endif %}>Antecipação</option>
-                    <option value="Imposto" {% if centro_custo_filter == 'Imposto' %}selected{% endif %}>Imposto</option>
-                    <option value="Diferido" {% if centro_custo_filter == 'Diferido' %}selected{% endif %}>Diferido</option>
-                    <option value="Extra" {% if centro_custo_filter == 'Extra' %}selected{% endif %}>Extra</option>
-                    <option value="Manutenção" {% if centro_custo_filter == 'Manutenção' %}selected{% endif %}>Manutenção</option>
-                    <option value="Comemoração" {% if centro_custo_filter == 'Comemoração' %}selected{% endif %}>Comemoração</option>
                     <option value="Bonificação" {% if centro_custo_filter == 'Bonificação' %}selected{% endif %}>Bonificação</option>
+                    <option value="Campanha" {% if centro_custo_filter == 'Campanha' %}selected{% endif %}>Campanha</option>
+                    <option value="Comemoração" {% if centro_custo_filter == 'Comemoração' %}selected{% endif %}>Comemoração</option>
+                    <option value="Comissão" {% if centro_custo_filter == 'Comissão' %}selected{% endif %}>Comissão</option>
+                    <option value="Diferido" {% if centro_custo_filter == 'Diferido' %}selected{% endif %}>Diferido</option>
+                    <option value="Empréstimos" {% if centro_custo_filter == 'Empréstimos' %}selected{% endif %}>Empréstimos</option>
+                    <option value="Equipamento" {% if centro_custo_filter == 'Equipamento' %}selected{% endif %}>Equipamento</option>
+                    <option value="Extra" {% if centro_custo_filter == 'Extra' %}selected{% endif %}>Extra</option>
+                    <option value="Folha de Pagamento" {% if centro_custo_filter == 'Folha de Pagamento' %}selected{% endif %}>Folha de Pagamento</option>
+                    <option value="Imposto" {% if centro_custo_filter == 'Imposto' %}selected{% endif %}>Imposto</option>
+                    <option value="Investimentos" {% if centro_custo_filter == 'Investimentos' %}selected{% endif %}>Investimentos</option>
+                    <option value="Locação" {% if centro_custo_filter == 'Locação' %}selected{% endif %}>Locação</option>
+                    <option value="Manutenção" {% if centro_custo_filter == 'Manutenção' %}selected{% endif %}>Manutenção</option>
+                    <option value="Participação dos Lucros" {% if centro_custo_filter == 'Participação dos Lucros' %}selected{% endif %}>Participação dos Lucros</option>
+                    <option value="Sistema" {% if centro_custo_filter == 'Sistema' %}selected{% endif %}>Sistema</option>
+                    <option value="Tarifa" {% if centro_custo_filter == 'Tarifa' %}selected{% endif %}>Tarifa</option>
                 </select>
             </div>
             <div class="form-group col-md-2">
@@ -120,59 +125,61 @@
     </a>
     <div class="card">
         <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr class="text-center">
-                        <th style="text-transform: uppercase;">Fornecedor</th>
-                        <th style="text-transform: uppercase;">Loja</th>
-                        <th style="text-transform: uppercase;">Centro de Custo</th>
-                        <th style="text-transform: uppercase;">Descrição</th>
-                        <th style="text-transform: uppercase;">Valor</th>
-                        <th style="text-transform: uppercase;">Data de Emissão</th>
-                        <th style="text-transform: uppercase;">Data de Vencimento</th>
-                        <th style="text-transform: uppercase;">Status</th>
-                        <th style="text-transform: uppercase;">Data de Recebimento</th>
-                        <th style="text-transform: uppercase;">Opções</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for recebimento in recebimentos %}
-                    <tr class="text-center">
-                        <td>{{ recebimento.cliente|upper }}</td>
-                        <td>{{ recebimento.loja|upper }}</td>
-                        <td>{{ recebimento.centro_custo|upper }}</td>
-                        <td>{{ recebimento.descricao|upper }}</td>
-                        <td>R$ {{ recebimento.valor|floatformat:2 }}</td>
-                        <td>{{ recebimento.data_emissao|date:"d/m/Y" }}</td>
-                        <td class="{% if recebimento.data_vencimento < today and recebimento.get_status_display != 'Pago' %}text-danger{% endif %}">
-                            {{ recebimento.data_vencimento|date:"d/m/Y" }}
-                        </td>
-                        <td>
-                            <span class="status-{{ recebimento.status }}">
-                                {{ recebimento.get_status_display|upper }}
-                            </span>
-                        </td>
-                        <td>{{ recebimento.data_recebimento|date:"d/m/Y" }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
-                                      Opções
-                                    </button>
-                                      <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{% url 'editar_recebimento' recebimento.id %}">Editar</a>
-                                        <a class="dropdown-item" href="{% url 'duplicar_recebimento' recebimento.id %}" data-toggle="duplicate-modal">Duplicar</a>
-                                        <a class="dropdown-item" href="{% url 'deletar_recebimento' recebimento.id %}" data-toggle="delete-modal">Deletar</a>
-                                    </div>
-                                </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr class="text-center">
+                            <th style="text-transform: uppercase;">Fornecedor</th>
+                            <th style="text-transform: uppercase;">Loja</th>
+                            <th style="text-transform: uppercase;">Centro de Custo</th>
+                            <th style="text-transform: uppercase;">Descrição</th>
+                            <th style="text-transform: uppercase;">Valor</th>
+                            <th style="text-transform: uppercase;">Data de Emissão</th>
+                            <th style="text-transform: uppercase;">Data de Vencimento</th>
+                            <th style="text-transform: uppercase;">Status</th>
+                            <th style="text-transform: uppercase;">Data de Recebimento</th>
+                            <th style="text-transform: uppercase;">Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for recebimento in recebimentos %}
+                        <tr class="text-center">
+                            <td>{{ recebimento.cliente|upper }}</td>
+                            <td>{{ recebimento.loja|upper }}</td>
+                            <td>{{ recebimento.centro_custo|upper }}</td>
+                            <td>{{ recebimento.descricao|upper }}</td>
+                            <td>R$ {{ recebimento.valor|floatformat:2 }}</td>
+                            <td>{{ recebimento.data_emissao|date:"d/m/Y" }}</td>
+                            <td class="{% if recebimento.data_vencimento < today and recebimento.get_status_display != 'Pago' %}text-danger{% endif %}">
+                                {{ recebimento.data_vencimento|date:"d/m/Y" }}
                             </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="10" class="text-center">Nenhum recebimento encontrado.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <td>
+                                <span class="status-{{ recebimento.status }}">
+                                    {{ recebimento.get_status_display|upper }}
+                                </span>
+                            </td>
+                            <td>{{ recebimento.data_recebimento|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                                        Opções
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="{% url 'editar_recebimento' recebimento.id %}">Editar</a>
+                                            <a class="dropdown-item" href="{% url 'duplicar_recebimento' recebimento.id %}" data-toggle="duplicate-modal">Duplicar</a>
+                                            <a class="dropdown-item" href="{% url 'deletar_recebimento' recebimento.id %}" data-toggle="delete-modal">Deletar</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center">Nenhum recebimento encontrado.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -205,6 +212,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Seção de Totais por Loja -->
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Total de Recebimentos por Loja</h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="text-transform: uppercase;">Loja</th>
+                    <th style="text-transform: uppercase;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loja, total in totais_por_loja.items %}
+                    <tr>
+                        <td>{{ loja }}</td>
+                        <td>R$ {{ total|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">Nenhum total disponível</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 
 <!-- Modal de Confirmação de Duplicação -->

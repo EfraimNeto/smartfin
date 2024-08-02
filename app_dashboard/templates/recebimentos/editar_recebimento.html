@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+    <a href="{% url 'recebimentos' %}" class="btn btn-primary mb-3">
+        <span class="fas fa-arrow-left mr-1"></span>
+        Voltar
+    </a>
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Exibição de erros -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erro! Por favor, corrija os erros abaixo.</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="id_cliente">Fornecedor</label>
+                    <select name="cliente" id="id_cliente" class="form-control">
+                        {% for fornecedor in form.cliente.field.queryset %}
+                            <option value="{{ fornecedor.id }}" {% if fornecedor.id == form.cliente.value %}selected{% endif %}>
+                                {{ fornecedor.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_descricao">Descrição</label>
+                    <input type="text" name="descricao" id="id_descricao" class="form-control" value="{{ form.descricao.value }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_valor">Valor</label>
+                    <input type="number" name="valor" id="id_valor" class="form-control" step="0.01" value="{{ form.valor.value|stringformat:'0.2f' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_data_vencimento">Data de Vencimento</label>
+                    <input type="date" name="data_vencimento" id="id_data_vencimento" class="form-control" value="{{ form.data_vencimento.value|date:"Y-m-d" }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_status">Status</label>
+                    <select name="status" id="id_status" class="form-control">
+                        {% for choice in form.status.field.choices %}
+                            <option value="{{ choice.0 }}" {% if form.status.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_loja">Loja</label>
+                    <select name="loja" id="id_loja" class="form-control">
+                        {% for choice in form.fields.loja.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.loja.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_centro_custo">Centro de Custo</label>
+                    <select name="centro_custo" id="id_centro_custo" class="form-control">
+                        {% for choice in form.fields.centro_custo.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.centro_custo.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_data_recebimento">Data de Recebimento</label>
+                    <input type="date" name="data_recebimento" id="id_data_recebimento" class="form-control" value="{{ form.data_recebimento.value|date:"Y-m-d" }}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <span class="fas fa-save"></span>
+                    Salvar
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

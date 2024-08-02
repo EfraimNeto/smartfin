@@ -9,6 +9,7 @@ from .models import Pagamento, Recebimento
 from django.utils.dateparse import parse_date
 from .models import Recebimento, RECEBIMENTO_STATUS
 from datetime import date
+import json
 
 from app_dashboard.models import Fornecedor, Cliente, Recebimento, Pagamento
 from app_dashboard.forms import FornecedorForm, clientesForm, RecebimentoForm, PagamentoForm, EditFornecedorForm, EditclientesForm, EditRecebimentoForm, EditPagamentoForm
@@ -35,20 +36,73 @@ def logout(request):
 
 @login_required
 def home(request):
-    pagamento = Pagamento.objects.order_by('data_vencimento')[:3]
-    recebimento = Recebimento.objects.order_by('data_vencimento')[:3]
+    # Dados para gráficos
+    receitas_por_loja = {
+        'Loja A': {'total_receitas': 5000},
+        'Loja B': {'total_receitas': 3000}
+    }
+    custos_por_loja = {
+        'Loja A': {'total_custos': 2000},
+        'Loja B': {'total_custos': 1000}
+    }
+    lucro_liquido_por_loja = {
+        'Loja A': {'lucro_liquido': 3000},
+        'Loja B': {'lucro_liquido': 2000}
+    }
+    
+    # Transformar dados em JSON
+    dados_json = json.dumps({
+        'receitasPorLoja': receitas_por_loja,
+        'custosPorLoja': custos_por_loja,
+        'lucroLiquidoPorLoja': lucro_liquido_por_loja
+    })
 
-    # Calcular os totais
+    # Dados para os cartões principais
+    pagamentos = Pagamento.objects.order_by('data_vencimento')[:3]
+    recebimentos = Recebimento.objects.order_by('data_vencimento')[:3]
+
     total_pagamento = Pagamento.objects.aggregate(total=Sum('valor'))['total'] or 0
     total_recebimento = Recebimento.objects.aggregate(total=Sum('valor'))['total'] or 0
 
+    # Garantir que os cartões principais exibam 0 se não existirem dados
+    if total_pagamento is None:
+        total_pagamento = 0
+    if total_recebimento is None:
+        total_recebimento = 0
+
+    # Dados para o resumo por loja
+    resumo_por_loja = {}
+    lojas = Pagamento.objects.values_list('loja', flat=True).distinct()
+    total_lucro_liquido = 0
+
+    for loja in lojas:
+        custos_por_centro = Pagamento.objects.filter(loja=loja).values('centro_custo').annotate(total=Sum('valor')).order_by('centro_custo')
+        receitas_por_centro = Recebimento.objects.filter(loja=loja).values('centro_custo').annotate(total=Sum('valor')).order_by('centro_custo')
+
+        total_custos = custos_por_centro.aggregate(total=Sum('total'))['total'] or 0
+        total_receitas = receitas_por_centro.aggregate(total=Sum('total'))['total'] or 0
+        lucro_liquido = total_receitas - total_custos
+
+        resumo_por_loja[loja] = {
+            'total_custos': total_custos,
+            'total_receitas': total_receitas,
+            'lucro_liquido': lucro_liquido,
+            'custos_por_centro': {item['centro_custo']: item['total'] for item in custos_por_centro},
+            'receitas_por_centro': {item['centro_custo']: item['total'] for item in receitas_por_centro}
+        }
+
+        total_lucro_liquido += lucro_liquido
+
     return render(request, 'dashboard/home.html', {
         'title': 'Dashboard',
-        'pagamentos': pagamento,
-        'recebimentos': recebimento,
+        'pagamentos': pagamentos,
+        'recebimentos': recebimentos,
         'total_pagamento': total_pagamento,
-        'total_recebimento': total_recebimento
-        })
+        'total_recebimento': total_recebimento,
+        'resumo_por_loja': resumo_por_loja,
+        'total_lucro_liquido': total_lucro_liquido,
+        'dados_json': dados_json,
+    })
 
 
 @login_required
@@ -294,7 +348,12 @@ def pagamentos(request):
     # Cálculo dos totais por centro de custo
     totais_por_centro_custo = pagamentos.values('centro_custo').annotate(total=Sum('valor')).filter(total__gt=0)
 
+    # Cálculo dos totais por loja
+    totais_por_loja = pagamentos.values('loja').annotate(total=Sum('valor')).filter(total__gt=0)
+    totais_por_loja_dict = {item['loja']: item['total'] for item in totais_por_loja}
+
     return render(request, 'pagamentos/pagamentos.html', {
+        'title': 'Pagamentos',
         'pagamentos': pagamentos,
         'data_inicio': data_inicio,
         'data_fim': data_fim,
@@ -310,6 +369,7 @@ def pagamentos(request):
         'total_pago': total_pago,
         'total_vencido': total_vencido,
         'totais_por_centro_custo': totais_por_centro_custo,
+        'totais_por_loja': totais_por_loja_dict,
         'today': date.today()
     })
 
@@ -339,8 +399,8 @@ def editar_pagamento(request, pagamento_id):
             return redirect('pagamentos')
     else:
         form = EditPagamentoForm(instance=pagamento)
-    return render(request, 'pagamentos/adicionar_pagamento.html', {
-        'title': f'Editar Pagamento: ',
+    return render(request, 'pagamentos/editar_pagamento.html', {
+        'title': f'Editar Pagamento',
         'form': form
     })
 
@@ -443,6 +503,10 @@ def recebimentos(request):
 
     # Cálculo dos totais por centro de custo
     totais_por_centro_custo = recebimentos.values('centro_custo').annotate(total=Sum('valor')).filter(total__gt=0)
+
+    # Cálculo dos totais por loja
+    totais_por_loja = recebimentos.values('loja').annotate(total=Sum('valor')).filter(total__gt=0)
+    totais_por_loja_dict = {item['loja']: item['total'] for item in totais_por_loja}
     
 
     return render(request, 'recebimentos/recebimentos.html', {
@@ -460,6 +524,7 @@ def recebimentos(request):
         'total_pago': total_pago,
         'total_vencido': total_vencido,
         'totais_por_centro_custo': totais_por_centro_custo,
+        'totais_por_loja': totais_por_loja_dict,
         'data_recebimento_inicio': data_recebimento_inicio,
         'data_recebimento_fim': data_recebimento_fim,
         'today': date.today()
@@ -471,6 +536,7 @@ def duplicar_recebimento(request, recebimento_id):
     
     # Criar um novo recebimento com os mesmos dados
     novo_recebimento = Recebimento(
+        cliente=recebimento.cliente,
         loja=recebimento.loja,
         centro_custo=recebimento.centro_custo,
         descricao=recebimento.descricao,
@@ -512,8 +578,8 @@ def editar_recebimento(request, recebimento_id):
             return redirect('recebimentos')
     else:
         form = EditRecebimentoForm(instance=recebimento)
-    return render(request, 'recebimentos/adicionar_recebimento.html', {
-        'title': f'Editar Recimento: ',
+    return render(request, 'recebimentos/editar_recebimento.html', {
+        'title': f'Editar Recebimento',
         'form': form
     })
 

@@ -1,41 +1,49 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
+<style>
+    /* Adiciona rolagem horizontal para tabelas em telas pequenas */
+.table-responsive {
+    overflow-x: auto;
+}
+</style>
     <a href="{% url 'adicionar_user' %}" class="btn btn-primary mb-3">
         <span class="fas fa-plus mr-1"></span>
         Cadastrar
     </a>
     <div class="card">
         <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Email</th>
-                        <th>Opções</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for Usuario in usuarios %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
                         <tr>
-                            <td>{{ Usuario.username }}</td>
-                            <td>{{ Usuario.email }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
-                                      Opções
-                                    </button>
-                                    <div class="dropdown-menu">
-                                      <a class="dropdown-item" href="{% url 'editar_user' Usuario.id %}">Editar</a>
-                                      <a class="dropdown-item" href="{% url 'alterar_senha_user' Usuario.id %}">Alterar Senha</a>
-                                      <a class="dropdown-item" href="{% url 'deletar_user' Usuario.id %}" data-toggle="delete-modal">Deletar</a>
-                                    </div>
-                                </div>
-                            </td>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Opções</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for Usuario in usuarios %}
+                            <tr>
+                                <td>{{ Usuario.username }}</td>
+                                <td>{{ Usuario.email }}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                                        Opções
+                                        </button>
+                                        <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{% url 'editar_user' Usuario.id %}">Editar</a>
+                                        <a class="dropdown-item" href="{% url 'alterar_senha_user' Usuario.id %}">Alterar Senha</a>
+                                        <a class="dropdown-item" href="{% url 'deletar_user' Usuario.id %}" data-toggle="delete-modal">Deletar</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

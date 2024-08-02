@@ -2,79 +2,324 @@
 {% load bootstrap4 %}
 
 {% block conteudo %}
+<style>
+    /* Adiciona rolagem horizontal para tabelas em telas pequenas */
+.table-responsive {
+    overflow-x: auto;
+}
+</style>
+    <!-- Card de Próximos Pagamentos a Vencer -->
     <div class="card">
         <h3 style="margin: 10px; text-align: center">Próximos Pagamentos a vencer</h3>
         <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th style="text-transform: uppercase;">Cliente</th>
-                        <th style="text-transform: uppercase;">Loja</th>
-                        <th style="text-transform: uppercase;">Centro de Custo</th>
-                        <th style="text-transform: uppercase;">Descrição</th>
-                        <th style="text-transform: uppercase;">Valor</th>
-                        <th style="text-transform: uppercase;">Data de Vencimento</th>
-                        <th style="text-transform: uppercase;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pagamento in pagamentos %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
                         <tr>
-                            <td>{{ pagamento.fornecedor|upper }}</td>
-                            <td>{{ pagamento.loja|upper }}</td>
-                            <td>{{ pagamento.centro_custo|upper }}</td>
-                            <td>{{ pagamento.descricao|upper }}</td>
-                            <td>{{ pagamento.valor|floatformat:2 }}</td>
-                            <td>{{ pagamento.data_vencimento }}</td>
-                            <td>{{ pagamento.get_status_display|upper }}</td>
-                            
+                            <th style="text-transform: uppercase;">Fornecedor</th>
+                            <th style="text-transform: uppercase;">Loja</th>
+                            <th style="text-transform: uppercase;">Centro de Custo</th>
+                            <th style="text-transform: uppercase;">Descrição</th>
+                            <th style="text-transform: uppercase;">Valor</th>
+                            <th style="text-transform: uppercase;">Data de Vencimento</th>
+                            <th style="text-transform: uppercase;">Status</th>
                         </tr>
-                    {% endfor %}
-                    <p><strong style="color: red;">Total de Pagamentos: R$ {{ total_pagamento|floatformat:2 }}</strong></p>
-                </tbody>
-            </table>
-            <a href="{% url 'pagamentos' %}" class="btn btn-primary mb-3-3">
+                    </thead>
+                    <tbody>
+                        {% for pagamento in pagamentos %}
+                            <tr>
+                                <td>{{ pagamento.fornecedor.nome|upper }}</td>
+                                <td>{{ pagamento.loja|upper }}</td>
+                                <td>{{ pagamento.centro_custo|upper }}</td>
+                                <td>{{ pagamento.descricao|upper }}</td>
+                                <td>{{ pagamento.valor|floatformat:2 }}</td>
+                                <td>{{ pagamento.data_vencimento }}</td>
+                                <td>{{ pagamento.get_status_display|upper }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p><strong style="color: red;">Total de Pagamentos: R$ {{ total_pagamento|floatformat:2 }}</strong></p>
+            <a href="{% url 'pagamentos' %}" class="btn btn-primary mb-3">
                 <span class="fas fa-plus mr-1"></span>
                 Ver todos
             </a>
         </div>
     </div>
 
+    <!-- Card de Próximos Recebimentos a Vencer -->
     <div class="card">
-        <h3 style="margin: 10px; text-align: center">Próximos recebimentos a vencer</h3>
+        <h3 style="margin: 10px; text-align: center">Próximos Recebimentos a vencer</h3>
         <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th style="text-transform: uppercase;">Cliente</th>
-                        <th style="text-transform: uppercase;">Loja</th>
-                        <th style="text-transform: uppercase;">Centro de Custo</th>
-                        <th style="text-transform: uppercase;">Descrição</th>
-                        <th style="text-transform: uppercase;">Valor</th>
-                        <th style="text-transform: uppercase;">Data de Vencimento</th>
-                        <th style="text-transform: uppercase;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for recebimento in recebimentos %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
                         <tr>
-                            <td>{{ recebimento.cliente|upper }}</td>
-                            <td>{{ recebimento.loja|upper }}</td>
-                            <td>{{ recebimento.centro_custo|upper }}</td>
-                            <td>{{ recebimento.descricao|upper }}</td>
-                            <td>{{ recebimento.valor|floatformat:2 }}</td>
-                            <td>{{ recebimento.data_vencimento }}</td>
-                            <td>{{ recebimento.get_status_display|upper }}</td>
+                            <th style="text-transform: uppercase;">Cliente</th>
+                            <th style="text-transform: uppercase;">Loja</th>
+                            <th style="text-transform: uppercase;">Centro de Custo</th>
+                            <th style="text-transform: uppercase;">Descrição</th>
+                            <th style="text-transform: uppercase;">Valor</th>
+                            <th style="text-transform: uppercase;">Data de Vencimento</th>
+                            <th style="text-transform: uppercase;">Status</th>
                         </tr>
-                    {% endfor %}
-                    <p><strong style="color: blue;">Total de Recebimentos: R$ {{ total_recebimento|floatformat:2}}</strong></p>
-                </tbody>
-            </table>
-            <a href="{% url 'recebimentos' %}" class="btn btn-primary mb-3-3 ">
+                    </thead>
+                    <tbody>
+                        {% for recebimento in recebimentos %}
+                            <tr>
+                                <td>{{ recebimento.cliente.nome|upper }}</td>
+                                <td>{{ recebimento.loja|upper }}</td>
+                                <td>{{ recebimento.centro_custo|upper }}</td>
+                                <td>{{ recebimento.descricao|upper }}</td>
+                                <td>{{ recebimento.valor|floatformat:2 }}</td>
+                                <td>{{ recebimento.data_vencimento }}</td>
+                                <td>{{ recebimento.get_status_display|upper }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p><strong style="color: blue;">Total de Recebimentos: R$ {{ total_recebimento|floatformat:2 }}</strong></p>
+            <a href="{% url 'recebimentos' %}" class="btn btn-primary mb-3">
                 <span class="fas fa-plus mr-1"></span>
                 Ver todos
             </a>
         </div>
+    </div>
+
+    <!-- Card com Resumo por Loja -->
+    <div class="card">
+        <h3 style="margin: 10px; text-align: center">Resumo por Loja</h3>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th style="text-transform: uppercase;">Loja</th>
+                            <th style="text-transform: uppercase;">Total de Custos</th>
+                            <th style="text-transform: uppercase;">Total de Receitas</th>
+                            <th style="text-transform: uppercase;">Lucro Líquido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loja, dados in resumo_por_loja.items %}
+                            <tr>
+                                <td>{{ loja|upper }}</td>
+                                <td>R$ {{ dados.total_custos|floatformat:2 }}</td>
+                                <td>R$ {{ dados.total_receitas|floatformat:2 }}</td>
+                                {% if dados.lucro_liquido >= 0 %}
+                                <td style="color: blue;"><strong>R$ {{ dados.lucro_liquido|floatformat:2 }}</strong></td>
+                                {% else %}
+                                <td style="color: red;"><strong>R$ {{ dados.lucro_liquido|floatformat:2 }}</strong></td>
+                                {% endif %}
+                            </tr>
+                            {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Nenhuma loja encontrada</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#detalhesModal">
+                Mostrar Detalhes
+            </button>
+            <button class="btn btn-secondary mt-3 ml-2" data-toggle="modal" data-target="#graficoModal">
+                Gráfico
+            </button>
         </div>
     </div>
+
+    <!-- Modal com Detalhes -->
+    <div class="modal fade" id="detalhesModal" tabindex="-1" role="dialog" aria-labelledby="detalhesModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalhesModalLabel">Detalhes por Loja</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <h5 class="card-header">Custos por Loja e Centro de Custo</h5>
+                        <div class="card-body">
+                            {% for loja, dados in resumo_por_loja.items %}
+                                <h6><strong style="color: rgb(44, 89, 236);">{{ loja|upper }}</strong></h6>
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-transform: uppercase;">Centro de Custo</th>
+                                            <th style="text-transform: uppercase;">Total de Custos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for centro_custo, valor in dados.custos_por_centro.items %}
+                                            <tr>
+                                                <td>{{ centro_custo|upper }}</td>
+                                                <td>R$ {{ valor|floatformat:2 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td><strong>Total Custos</strong></td>
+                                            <td><strong style="color: red;">R$ {{ dados.total_custos|floatformat:2 }}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <h5 class="card-header">Receitas por Loja e Centro de Custo</h5>
+                        <div class="card-body">
+                            {% for loja, dados in resumo_por_loja.items %}
+                                <h6><strong style="color: rgb(44, 89, 236);">{{ loja|upper }}</strong></h6>
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-transform: uppercase;">Centro de Custo</th>
+                                            <th style="text-transform: uppercase;">Total de Receitas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for centro_custo, valor in dados.receitas_por_centro.items %}
+                                            <tr>
+                                                <td>{{ centro_custo|upper }}</td>
+                                                <td>R$ {{ valor|floatformat:2 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td><strong>Total Receitas</strong></td>
+                                            <td><strong style="color: blue;">R$ {{ dados.total_receitas|floatformat:2 }}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <h5 class="card-header">Lucro Líquido por Loja</h5>
+                        <div class="card-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="text-transform: uppercase;">Loja</th>
+                                        <th style="text-transform: uppercase;">Lucro Líquido</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for loja, dados in resumo_por_loja.items %}
+                                        <tr>
+                                            <td>{{ loja|upper }}</td>
+                                            <td>R$ {{ dados.lucro_liquido|floatformat:2 }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        {% if total_lucro_liquido >= 0 %}
+                                        <td><strong style="color: blue;">Total Lucro Lojas</strong></td>
+                                        <td><strong style="color: blue;">R$ {{ total_lucro_liquido|floatformat:2 }}</strong></td>
+                                        {% else %}
+                                        <td><strong style="color: red;">Total Lucro Lojas</strong></td>
+                                        <td><strong style="color: red;">R$ {{ total_lucro_liquido|floatformat:2 }}</strong></td>
+                                        {% endif %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gráficos -->
+    <div class="modal fade" id="graficoModal" tabindex="-1" role="dialog" aria-labelledby="graficoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="graficoModalLabel">Gráficos de Custos e Receitas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script id="dados" type="application/json">
+        {{ dados_json|safe }}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Obtendo os dados JSON do elemento <script>
+            const dadosElement = document.getElementById('dados');
+            const dados = JSON.parse(dadosElement.textContent);
+    
+            // Extraindo dados para gráficos
+            const receitas = dados.receitasPorLoja;
+            const custos = dados.custosPorLoja;
+            const lucroLiquido = dados.lucroLiquidoPorLoja;
+    
+            // Prepare os dados para o gráfico de pizza
+            const labelsPie = Object.keys(receitas);
+            const dataPie = labelsPie.map(loja => receitas[loja].total_receitas);
+    
+            // Prepare os dados para o gráfico de barras
+            const labelsBar = Object.keys(lucroLiquido);
+            const dataBar = labelsBar.map(loja => lucroLiquido[loja].lucro_liquido);
+    
+            // Gráfico de Pizza
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: labelsPie,
+                    datasets: [{
+                        label: 'Receitas por Loja',
+                        data: dataPie,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                }
+            });
+    
+            // Gráfico de Barras
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labelsBar,
+                    datasets: [{
+                        label: 'Lucro Líquido por Loja',
+                        data: dataBar,
+                        backgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    
+
+
 {% endblock %}
