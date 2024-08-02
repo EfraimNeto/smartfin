@@ -8,24 +8,29 @@
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>Cliente</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Data de Vencimento</th>
-                        <th>Status</th>
+                        <th style="text-transform: uppercase;">Cliente</th>
+                        <th style="text-transform: uppercase;">Loja</th>
+                        <th style="text-transform: uppercase;">Centro de Custo</th>
+                        <th style="text-transform: uppercase;">Descrição</th>
+                        <th style="text-transform: uppercase;">Valor</th>
+                        <th style="text-transform: uppercase;">Data de Vencimento</th>
+                        <th style="text-transform: uppercase;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for pagamento in pagamentos %}
                         <tr>
-                            <td>{{ pagamento.fornecedor }}</td>
-                            <td>{{ pagamento.descricao }}</td>
-                            <td>{{ pagamento.valor }}</td>
+                            <td>{{ pagamento.fornecedor|upper }}</td>
+                            <td>{{ pagamento.loja|upper }}</td>
+                            <td>{{ pagamento.centro_custo|upper }}</td>
+                            <td>{{ pagamento.descricao|upper }}</td>
+                            <td>{{ pagamento.valor|floatformat:2 }}</td>
                             <td>{{ pagamento.data_vencimento }}</td>
-                            <td>{{ pagamento.get_status_display }}</td>
+                            <td>{{ pagamento.get_status_display|upper }}</td>
                             
                         </tr>
                     {% endfor %}
+                    <p><strong style="color: red;">Total de Pagamentos: R$ {{ total_pagamento|floatformat:2 }}</strong></p>
                 </tbody>
             </table>
             <a href="{% url 'pagamentos' %}" class="btn btn-primary mb-3-3">
@@ -41,23 +46,28 @@
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>Cliente</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Data de Vencimento</th>
-                        <th>Status</th>
+                        <th style="text-transform: uppercase;">Cliente</th>
+                        <th style="text-transform: uppercase;">Loja</th>
+                        <th style="text-transform: uppercase;">Centro de Custo</th>
+                        <th style="text-transform: uppercase;">Descrição</th>
+                        <th style="text-transform: uppercase;">Valor</th>
+                        <th style="text-transform: uppercase;">Data de Vencimento</th>
+                        <th style="text-transform: uppercase;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for recebimento in recebimentos %}
                         <tr>
-                            <td>{{ recebimento.cliente }}</td>
-                            <td>{{ recebimento.descricao }}</td>
-                            <td>{{ recebimento.valor }}</td>
+                            <td>{{ recebimento.cliente|upper }}</td>
+                            <td>{{ recebimento.loja|upper }}</td>
+                            <td>{{ recebimento.centro_custo|upper }}</td>
+                            <td>{{ recebimento.descricao|upper }}</td>
+                            <td>{{ recebimento.valor|floatformat:2 }}</td>
                             <td>{{ recebimento.data_vencimento }}</td>
-                            <td>{{ recebimento.get_status_display }}</td>
+                            <td>{{ recebimento.get_status_display|upper }}</td>
                         </tr>
                     {% endfor %}
+                    <p><strong style="color: blue;">Total de Recebimentos: R$ {{ total_recebimento|floatformat:2}}</strong></p>
                 </tbody>
             </table>
             <a href="{% url 'recebimentos' %}" class="btn btn-primary mb-3-3 ">

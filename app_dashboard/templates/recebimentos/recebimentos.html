@@ -3,6 +3,117 @@
 {% load bootstrap4 %}
 
 {% block conteudo %}
+<style>
+    /* Estilo da tabela para garantir linhas visíveis */
+.table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table td,
+.table th {
+    border: 1px solid #dee2e6; /* Cor das linhas da tabela */
+    padding: 8px; /* Ajuste o padding conforme necessário */
+}
+
+.table td {
+    text-align: center; /* Centraliza o texto dentro das células */
+}
+
+/* Estilos do botão de status */
+.status-pago,
+.status-pendente,
+.status-vencido {
+    background-color: #28a745; /* Verde para pago */
+    color: white;
+    padding: 4px 12px; /* Aumenta o padding para um botão maior */
+    border-radius: 16px; /* Borda arredondada mais pronunciada */
+    text-align: center;
+    display: inline-block; /* Ajusta o botão ao tamanho do texto */
+    font-size: 0.875rem; /* Tamanho da fonte ajustado para um botão maior */
+    white-space: nowrap; /* Impede a quebra de linha no botão */
+    vertical-align: middle; /* Alinha verticalmente o botão */
+}
+
+.status-pendente {
+    background-color: #fd7e14; /* Laranja para pendente */
+}
+
+.status-vencido {
+    background-color: #dc3545; /* Vermelho para vencido */
+}
+.text-danger {
+    color: #dc3545; /* Vermelho */
+}
+    </style>
+    <!-- Formulário de Filtro -->
+    <form method="GET" action="{% url 'recebimentos' %}">
+        <div class="form-row align-items-end">
+            <div class="form-group col-md-2">
+                <label for="data_inicio" style="text-transform: uppercase;">Data Inicial</label>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="data_fim" style="text-transform: uppercase;">Data Final</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="loja" style="text-transform: uppercase;">Loja</label>
+                <select class="form-control" id="loja" name="loja">
+                    <option value="">Selecione</option>
+                    {% for loja in lojas %}
+                        <option value="{{ loja }}" {% if loja_filter == loja %}selected{% endif %}>{{ loja }}</option>
+                    {% empty %}
+                        <option value="">Nenhuma loja disponível</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="centro_custo" style="text-transform: uppercase;">Centro de Custo</label>
+                <select class="form-control" id="centro_custo" name="centro_custo">
+                    <option value="">Todos</option>
+                    <option value="Locação" {% if centro_custo_filter == 'Locação' %}selected{% endif %}>Locação</option>
+                    <option value="Sistema" {% if centro_custo_filter == 'Sistema' %}selected{% endif %}>Sistema</option>
+                    <option value="Folha de Pagamento" {% if centro_custo_filter == 'Folha de Pagamento' %}selected{% endif %}>Folha de Pagamento</option>
+                    <option value="Participação dos Lucros" {% if centro_custo_filter == 'Participação dos Lucros' %}selected{% endif %}>Participação dos Lucros</option>
+                    <option value="Tarifa" {% if centro_custo_filter == 'Tarifa' %}selected{% endif %}>Tarifa</option>
+                    <option value="Empréstimos" {% if centro_custo_filter == 'Empréstimos' %}selected{% endif %}>Empréstimos</option>
+                    <option value="Investimentos" {% if centro_custo_filter == 'Investimentos' %}selected{% endif %}>Investimentos</option>
+                    <option value="Campanha" {% if centro_custo_filter == 'Campanha' %}selected{% endif %}>Campanha</option>
+                    <option value="Comissão" {% if centro_custo_filter == 'Comissão' %}selected{% endif %}>Comissão</option>
+                    <option value="Antecipação" {% if centro_custo_filter == 'Antecipação' %}selected{% endif %}>Antecipação</option>
+                    <option value="Imposto" {% if centro_custo_filter == 'Imposto' %}selected{% endif %}>Imposto</option>
+                    <option value="Diferido" {% if centro_custo_filter == 'Diferido' %}selected{% endif %}>Diferido</option>
+                    <option value="Extra" {% if centro_custo_filter == 'Extra' %}selected{% endif %}>Extra</option>
+                    <option value="Manutenção" {% if centro_custo_filter == 'Manutenção' %}selected{% endif %}>Manutenção</option>
+                    <option value="Comemoração" {% if centro_custo_filter == 'Comemoração' %}selected{% endif %}>Comemoração</option>
+                    <option value="Bonificação" {% if centro_custo_filter == 'Bonificação' %}selected{% endif %}>Bonificação</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="status" style="text-transform: uppercase;">Status</label>
+                <select class="form-control" id="status" name="status">
+                    <option value="">Todos</option>
+                    <option value="pendente" {% if status_filter == 'pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="recebido" {% if status_filter == 'recebido' %}selected{% endif %}>Recebido</option>
+                    <option value="vencido" {% if status_filter == 'vencido' %}selected{% endif %}>Vencido</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="data_recebimento_inicio" style="text-transform: uppercase;">Data de Recebimento Inicial</label>
+                <input type="date" class="form-control" id="data_recebimento_inicio" name="data_recebimento_inicio" value="{{ data_recebimento_inicio }}">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="data_recebimento_fim" style="text-transform: uppercase;">Data de Recebimento Final</label>
+                <input type="date" class="form-control" id="data_recebimento_fim" name="data_recebimento_fim" value="{{ data_recebimento_fim }}">
+            </div>
+            <div class="form-group col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <a href="{% url 'recebimentos' %}" class="btn btn-secondary ml-2">Limpar</a>
+            </div>
+        </div>
+    </form>
+
     <a href="{% url 'adicionar_recebimento' %}" class="btn btn-primary mb-3">
         <span class="fas fa-plus mr-1"></span>
         Adicionar
@@ -11,41 +122,159 @@
         <div class="card-body">
             <table class="table table-bordered table-hover">
                 <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Data de Emissão</th>
-                        <th>Data de Vencimento</th>
-                        <th>Status</th>
-                        <th>Opções</th>
+                    <tr class="text-center">
+                        <th style="text-transform: uppercase;">Fornecedor</th>
+                        <th style="text-transform: uppercase;">Loja</th>
+                        <th style="text-transform: uppercase;">Centro de Custo</th>
+                        <th style="text-transform: uppercase;">Descrição</th>
+                        <th style="text-transform: uppercase;">Valor</th>
+                        <th style="text-transform: uppercase;">Data de Emissão</th>
+                        <th style="text-transform: uppercase;">Data de Vencimento</th>
+                        <th style="text-transform: uppercase;">Status</th>
+                        <th style="text-transform: uppercase;">Data de Recebimento</th>
+                        <th style="text-transform: uppercase;">Opções</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for recebimento in recebimentos %}
-                        <tr>
-                            <td>{{ recebimento.cliente }}</td>
-                            <td>{{ recebimento.descricao }}</td>
-                            <td>{{ recebimento.valor }}</td>
-                            <td>{{ recebimento.data_emissao }}</td>
-                            <td>{{ recebimento.data_vencimento }}</td>
-                            <td>{{ recebimento.get_status_display }}</td>
+                    <tr class="text-center">
+                        <td>{{ recebimento.cliente|upper }}</td>
+                        <td>{{ recebimento.loja|upper }}</td>
+                        <td>{{ recebimento.centro_custo|upper }}</td>
+                        <td>{{ recebimento.descricao|upper }}</td>
+                        <td>R$ {{ recebimento.valor|floatformat:2 }}</td>
+                        <td>{{ recebimento.data_emissao|date:"d/m/Y" }}</td>
+                        <td class="{% if recebimento.data_vencimento < today and recebimento.get_status_display != 'Pago' %}text-danger{% endif %}">
+                            {{ recebimento.data_vencimento|date:"d/m/Y" }}
+                        </td>
+                        <td>
+                            <span class="status-{{ recebimento.status }}">
+                                {{ recebimento.get_status_display|upper }}
+                            </span>
+                        </td>
+                        <td>{{ recebimento.data_recebimento|date:"d/m/Y" }}</td>
                             <td>
                                 <div class="dropdown">
                                     <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
                                       Opções
                                     </button>
-                                    <div class="dropdown-menu">
-                                      <a class="dropdown-item" href="{% url 'editar_recebimento' recebimento.id %}">Editar</a>
-                                      <a class="dropdown-item" href="{% url 'deletar_recebimento' recebimento.id %}">Deletar</a>
+                                      <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{% url 'editar_recebimento' recebimento.id %}">Editar</a>
+                                        <a class="dropdown-item" href="{% url 'duplicar_recebimento' recebimento.id %}" data-toggle="duplicate-modal">Duplicar</a>
+                                        <a class="dropdown-item" href="{% url 'deletar_recebimento' recebimento.id %}" data-toggle="delete-modal">Deletar</a>
                                     </div>
                                 </div>
-
                             </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center">Nenhum recebimento encontrado.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- Seção para Totais -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5>Total de Recebimentos</h5>
+            <p><strong style="color: blue;">R$ {{ total_recebimento|floatformat:2 }}</strong></p>
+            
+            <!-- Divisão para Totais por Status -->
+            <div class="mt-4">
+                <h6>Total por Status</h6>
+                <p class="mb-0">
+                    <span><strong>Pendente:</strong> R$ {{ total_pendente|floatformat:2 }}</span>
+                    <span class="mx-2">|</span>
+                    <span><strong>Pago:</strong> R$ {{ total_pago|floatformat:2 }}</span>
+                    <span class="mx-2">|</span>
+                    <span><strong>Vencido:</strong> R$ {{ total_vencido|floatformat:2 }}</span>
+                </p>
+            </div>
+            <!-- Divisão para Totais por Centro de Custo -->
+            <div class="mt-4">
+                <h6>Total por Centro de Custo</h6>
+                <p class="mb-0">
+                    {% for centro_custo in totais_por_centro_custo %}
+                        <span><strong>{{ centro_custo.centro_custo }}:</strong> R$ {{ centro_custo.total|floatformat:2 }}</span>
+                        {% if not forloop.last %}<span class="mx-2">|</span>{% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Modal de Confirmação de Duplicação -->
+<div class="modal fade" id="confirmDuplicateModal" tabindex="-1" role="dialog" aria-labelledby="confirmDuplicateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDuplicateModalLabel">Confirmar Duplicação</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Você tem certeza de que deseja duplicar este recebimento?
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="confirm-duplicate-btn" class="btn btn-primary">Duplicar</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Deleção -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Você tem certeza de que deseja deletar este recebimento?
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="confirm-delete-btn" class="btn btn-danger">Deletar</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var duplicateLinks = document.querySelectorAll('.dropdown-item[data-toggle="duplicate-modal"]');
+        var deleteLinks = document.querySelectorAll('.dropdown-item[data-toggle="delete-modal"]');
+        var confirmDuplicateBtn = document.getElementById('confirm-duplicate-btn');
+        var confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        
+        duplicateLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var url = this.getAttribute('href');
+                $('#confirmDuplicateModal').modal('show');
+                confirmDuplicateBtn.setAttribute('href', url);
+            });
+        });
+        
+        deleteLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var url = this.getAttribute('href');
+                $('#confirmDeleteModal').modal('show');
+                confirmDeleteBtn.setAttribute('href', url);
+            });
+        });
+    });
+    </script>
+
 {% endblock %}

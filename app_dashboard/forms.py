@@ -15,7 +15,9 @@ class FornecedorForm(forms.ModelForm):
             'numero', 
             'bairro', 
             'cidade', 
-            'estado'
+            'estado',
+            'loja',
+            'centro_custo'
         ]
 
 class EditFornecedorForm(forms.ModelForm):
@@ -30,7 +32,9 @@ class EditFornecedorForm(forms.ModelForm):
             'numero', 
             'bairro', 
             'cidade', 
-            'estado'
+            'estado',
+            'loja',
+            'centro_custo'
         ]
 
 
@@ -80,7 +84,9 @@ class clientesForm(forms.ModelForm):
             'numero', 
             'bairro', 
             'cidade', 
-            'estado'
+            'estado',
+            'loja',
+            'centro_custo'
         ]
 
 class EditclientesForm(forms.ModelForm):
@@ -95,7 +101,9 @@ class EditclientesForm(forms.ModelForm):
             'numero', 
             'bairro', 
             'cidade', 
-            'estado'
+            'estado',
+            'loja',
+            'centro_custo'
         ]
 
 
@@ -105,7 +113,8 @@ class RecebimentoForm(forms.ModelForm):
         model = Recebimento
         fields = '__all__'
         widgets = {
-            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'})
+            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'data_recebimento': forms.DateInput(attrs={'type': 'date'})
         }
 
 
@@ -115,7 +124,8 @@ class EditRecebimentoForm(forms.ModelForm):
         model = Recebimento
         fields = '__all__'
         widgets = {
-            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'})
+            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'data_recebimento': forms.DateInput(attrs={'type': 'date'})
         }
 
 class PagamentoForm(forms.ModelForm):
@@ -124,7 +134,8 @@ class PagamentoForm(forms.ModelForm):
         model = Pagamento
         fields = '__all__'
         widgets = {
-            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'})
+            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'data_pagamento': forms.DateInput(attrs={'type': 'date'})
         }
 
 
@@ -134,5 +145,6 @@ class EditPagamentoForm(forms.ModelForm):
         model = Pagamento
         fields = '__all__'
         widgets = {
-            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'})
+            'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
+            'data_pagamento': forms.DateInput(attrs={'type': 'date'})
         }

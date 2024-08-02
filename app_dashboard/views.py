@@ -4,6 +4,11 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 from django.contrib import messages
+from django.db.models import Sum  # Corrigido: importar Sum de models
+from .models import Pagamento, Recebimento
+from django.utils.dateparse import parse_date
+from .models import Recebimento, RECEBIMENTO_STATUS
+from datetime import date
 
 from app_dashboard.models import Fornecedor, Cliente, Recebimento, Pagamento
 from app_dashboard.forms import FornecedorForm, clientesForm, RecebimentoForm, PagamentoForm, EditFornecedorForm, EditclientesForm, EditRecebimentoForm, EditPagamentoForm
@@ -32,10 +37,17 @@ def logout(request):
 def home(request):
     pagamento = Pagamento.objects.order_by('data_vencimento')[:3]
     recebimento = Recebimento.objects.order_by('data_vencimento')[:3]
+
+    # Calcular os totais
+    total_pagamento = Pagamento.objects.aggregate(total=Sum('valor'))['total'] or 0
+    total_recebimento = Recebimento.objects.aggregate(total=Sum('valor'))['total'] or 0
+
     return render(request, 'dashboard/home.html', {
         'title': 'Dashboard',
         'pagamentos': pagamento,
-        'recebimentos': recebimento
+        'recebimentos': recebimento,
+        'total_pagamento': total_pagamento,
+        'total_recebimento': total_recebimento
         })
 
 
@@ -216,11 +228,90 @@ def deletar_clientes(request, cliente_id):
 
 @login_required
 def pagamentos(request):
-    pagamento = Pagamento.objects.all()
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    data_pagamento_inicio = request.GET.get('data_pagamento_inicio')
+    data_pagamento_fim = request.GET.get('data_pagamento_fim')
+    loja_filter = request.GET.get('loja')
+    centro_custo_filter = request.GET.get('centro_custo')
+    status_filter = request.GET.get('status')
+
+    # Converte as datas de início e fim para objetos datetime.date, se válidas
+    if data_inicio:
+        data_inicio = parse_date(data_inicio)
+    if data_fim:
+        data_fim = parse_date(data_fim)
+    
+    if data_pagamento_inicio:
+        data_pagamento_inicio = parse_date(data_pagamento_inicio)
+    if data_pagamento_fim:
+        data_pagamento_fim = parse_date(data_pagamento_fim)
+
+    # Filtra os pagamentos com base nas datas, loja, centro de custo e status fornecidos
+    pagamentos = Pagamento.objects.all()
+    
+    if data_inicio and data_fim:
+        pagamentos = pagamentos.filter(data_vencimento__range=[data_inicio, data_fim])
+    elif data_inicio:
+        pagamentos = pagamentos.filter(data_vencimento__gte=data_inicio)
+    elif data_fim:
+        pagamentos = pagamentos.filter(data_vencimento__lte=data_fim)
+
+    if data_pagamento_inicio and data_pagamento_fim:
+        pagamentos = pagamentos.filter(data_pagamento__range=[data_pagamento_inicio, data_pagamento_fim])
+    elif data_pagamento_inicio:
+        pagamentos = pagamentos.filter(data_pagamento__gte=data_pagamento_inicio)
+    elif data_pagamento_fim:
+        pagamentos = pagamentos.filter(data_pagamento__lte=data_pagamento_fim)
+
+    if loja_filter:
+        pagamentos = pagamentos.filter(loja=loja_filter)
+
+    if centro_custo_filter:
+        pagamentos = pagamentos.filter(centro_custo=centro_custo_filter)
+
+    if status_filter:
+        pagamentos = pagamentos.filter(status=status_filter)
+
+    # Obtém todas as lojas distintas e centros de custo para o filtro
+    lojas = Pagamento.objects.values_list('loja', flat=True).distinct()
+    centros_custo = Pagamento.objects.values_list('centro_custo', flat=True).distinct()
+
+    # Calcula o total dos pagamentos
+    total_pagamento = pagamentos.aggregate(Sum('valor'))['valor__sum'] or 0
+
+    # Calcula os totais por status
+    total_pendente = Pagamento.objects.filter(status='pendente').aggregate(Sum('valor'))['valor__sum'] or 0
+    total_pago = Pagamento.objects.filter(status='pago').aggregate(Sum('valor'))['valor__sum'] or 0
+    total_vencido = Pagamento.objects.filter(status='vencido').aggregate(Sum('valor'))['valor__sum'] or 0
+
+    # Ajusta os totais com base no filtro de data
+    if data_inicio or data_fim:
+        total_pendente = Pagamento.objects.filter(status='pendente', data_vencimento__range=[data_inicio, data_fim] if data_inicio and data_fim else None).aggregate(Sum('valor'))['valor__sum'] or 0
+        total_pago = Pagamento.objects.filter(status='pago', data_vencimento__range=[data_inicio, data_fim] if data_inicio and data_fim else None).aggregate(Sum('valor'))['valor__sum'] or 0
+        total_vencido = Pagamento.objects.filter(status='vencido', data_vencimento__range=[data_inicio, data_fim] if data_inicio and data_fim else None).aggregate(Sum('valor'))['valor__sum'] or 0
+
+    # Cálculo dos totais por centro de custo
+    totais_por_centro_custo = pagamentos.values('centro_custo').annotate(total=Sum('valor')).filter(total__gt=0)
+
     return render(request, 'pagamentos/pagamentos.html', {
-        'title': 'Pagamentos',
-        'pagamentos': pagamento
-        })
+        'pagamentos': pagamentos,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+        'lojas': lojas,
+        'centros_custo': centros_custo,
+        'loja_filter': loja_filter,
+        'centro_custo_filter': centro_custo_filter,
+        'status_filter': status_filter,
+        'data_pagamento_inicio': data_pagamento_inicio,
+        'data_pagamento_fim': data_pagamento_fim,
+        'total_pagamento': total_pagamento,
+        'total_pendente': total_pendente,
+        'total_pago': total_pago,
+        'total_vencido': total_vencido,
+        'totais_por_centro_custo': totais_por_centro_custo,
+        'today': date.today()
+    })
 
 @login_required
 def adicionar_pagamento(request):
@@ -253,6 +344,27 @@ def editar_pagamento(request, pagamento_id):
         'form': form
     })
 
+def duplicar_pagamento(request, pagamento_id):
+    # Recuperar o pagamento a ser duplicado
+    pagamento = get_object_or_404(Pagamento, id=pagamento_id)
+    
+    # Criar um novo pagamento com os mesmos dados
+    novo_pagamento = Pagamento(
+        fornecedor=pagamento.fornecedor,
+        loja=pagamento.loja,
+        centro_custo=pagamento.centro_custo,
+        descricao=pagamento.descricao,
+        valor=pagamento.valor,
+        data_emissao=pagamento.data_emissao,
+        data_vencimento=pagamento.data_vencimento,
+        status=pagamento.status,
+        data_pagamento=pagamento.data_pagamento,
+    )
+    novo_pagamento.save()
+    
+    # Redirecionar de volta para a página de listagem com uma mensagem de sucesso
+    return redirect('pagamentos')
+
 @login_required
 def deletar_pagamento(request, pagamento_id):
     pagamento = get_object_or_404(Pagamento, pk=pagamento_id)
@@ -263,13 +375,116 @@ def deletar_pagamento(request, pagamento_id):
 
 @login_required
 def recebimentos(request):
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    loja_filter = request.GET.get('loja')
+    centro_custo_filter = request.GET.get('centro_custo')
+    status_filter = request.GET.get('status')
+    data_recebimento_inicio = request.GET.get('data_recebimento_inicio')
+    data_recebimento_fim = request.GET.get('data_recebimento_fim')
+
+    RECEBIMENTO_STATUS = [
+    ('pendente', 'Pendente'),
+    ('pago', 'Pago'),
+    ('vencido', 'Vencido'),
+    ]
+
+    # Converte as datas de início e fim para objetos datetime.date
+    if data_inicio:
+        data_inicio = parse_date(data_inicio)
+    if data_fim:
+        data_fim = parse_date(data_fim)
+
+    if data_recebimento_inicio:
+        data_recebimento_inicio = parse_date(data_recebimento_inicio)
+    if data_recebimento_fim:
+        data_recebimento_fim = parse_date(data_recebimento_fim)
+
+    # Filtra os recebimentos com base nas datas, loja e centro de custo fornecidos
     recebimentos = Recebimento.objects.all()
+    
+    if data_inicio and data_fim:
+        recebimentos = recebimentos.filter(data_vencimento__range=[data_inicio, data_fim])
+    elif data_inicio:
+        recebimentos = recebimentos.filter(data_vencimento__gte=data_inicio)
+    elif data_fim:
+        recebimentos = recebimentos.filter(data_vencimento__lte=data_fim)
+
+    if loja_filter:
+        recebimentos = recebimentos.filter(loja=loja_filter)
+
+    if centro_custo_filter:
+        recebimentos = recebimentos.filter(centro_custo=centro_custo_filter)
+
+    if status_filter:
+        recebimentos = recebimentos.filter(status=status_filter)
+
+    if data_recebimento_inicio and data_recebimento_fim:
+        recebimentos = recebimentos.filter(data_recebimento__range=[data_recebimento_inicio, data_recebimento_fim])
+    elif data_recebimento_inicio:
+        recebimentos = recebimentos.filter(data_recebimento__gte=data_recebimento_inicio)
+    elif data_recebimento_fim:
+        recebimentos = recebimentos.filter(data_recebimento__lte=data_recebimento_fim)
+
+    # Obtém todas as lojas distintas e centros de custo para o filtro
+    lojas = Recebimento.objects.values_list('loja', flat=True).distinct()
+    centros_custo = Recebimento.objects.values_list('centro_custo', flat=True).distinct()
+
+    # Passar RECEBIMENTO_STATUS para o template
+    status_options = RECEBIMENTO_STATUS
+
+    # Calcular os totais
+    total_recebimento = recebimentos.aggregate(total=Sum('valor'))['total'] or 0
+
+    # Calcula os totais por status
+    total_pendente = Recebimento.objects.filter(status='pendente').aggregate(Sum('valor'))['valor__sum'] or 0
+    total_pago = Recebimento.objects.filter(status='pago').aggregate(Sum('valor'))['valor__sum'] or 0
+    total_vencido = Recebimento.objects.filter(status='vencido').aggregate(Sum('valor'))['valor__sum'] or 0
+
+    # Cálculo dos totais por centro de custo
+    totais_por_centro_custo = recebimentos.values('centro_custo').annotate(total=Sum('valor')).filter(total__gt=0)
+    
 
     return render(request, 'recebimentos/recebimentos.html', {
         'title': 'Recebimentos',
-        'recebimentos': recebimentos
+        'recebimentos': recebimentos,
+        'total_recebimento': total_recebimento,
+        'lojas': lojas,
+        'centros_custo': centros_custo,  # Adicionado aqui
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+        'loja_filter': loja_filter,
+        'centro_custo_filter': centro_custo_filter,  # Adicionado aqui
+        'status_filter': status_filter,
+        'total_pendente': total_pendente,
+        'total_pago': total_pago,
+        'total_vencido': total_vencido,
+        'totais_por_centro_custo': totais_por_centro_custo,
+        'data_recebimento_inicio': data_recebimento_inicio,
+        'data_recebimento_fim': data_recebimento_fim,
+        'today': date.today()
     })
 
+def duplicar_recebimento(request, recebimento_id):
+    # Recuperar o recebimento a ser duplicado
+    recebimento = get_object_or_404(Recebimento, id=recebimento_id)
+    
+    # Criar um novo recebimento com os mesmos dados
+    novo_recebimento = Recebimento(
+        loja=recebimento.loja,
+        centro_custo=recebimento.centro_custo,
+        descricao=recebimento.descricao,
+        valor=recebimento.valor,
+        data_emissao=recebimento.data_emissao,
+        data_vencimento=recebimento.data_vencimento,
+        status=recebimento.status,
+        data_recebimento=recebimento.data_recebimento,  # Inclua data_recebimento se necessário
+    )
+    novo_recebimento.save()
+    
+    # Redirecionar de volta para a página de listagem com uma mensagem de sucesso
+    messages.success(request, "Recebimento duplicado com sucesso.")
+    return redirect('recebimentos')
 
 @login_required
 def adicionar_recebimento(request):
@@ -309,3 +524,24 @@ def deletar_recebimento(request, recebimento_id):
     recebimento.delete()
     messages.success(request, f'Recebimento deletado com sucesso!')
     return redirect('recebimentos')
+
+
+def pagamentos_view(request):
+    # Obtendo todos os valores únicos de loja dos pagamentos
+    lojas = Pagamento.objects.values_list('loja', flat=True).distinct()
+    
+    # Filtrando os pagamentos com base nos parâmetros da requisição
+    pagamentos = Pagamento.objects.all()
+    
+    loja_filter = request.GET.get('loja')
+    if loja_filter:
+        pagamentos = pagamentos.filter(loja=loja_filter)
+    
+    # Passando os pagamentos e a lista de lojas para o template
+    context = {
+        'pagamentos': pagamentos,
+        'lojas': lojas,
+        'total_pagamento': pagamentos.aggregate(Sum('valor'))['valor__sum'] or 0,
+    }
+    
+    return render(request, 'pagamentos.html', context)

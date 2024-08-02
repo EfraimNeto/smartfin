@@ -30,9 +30,11 @@ urlpatterns = [
     path('pagamentos/adicionar', views.adicionar_pagamento, name='adicionar_pagamento'),
     path('pagamentos/editar/<pagamento_id>/', views.editar_pagamento, name='editar_pagamento'),
     path('pagamentos/deletar/<pagamento_id>/', views.deletar_pagamento, name='deletar_pagamento'),
+    path('duplicar_pagamento/<int:pagamento_id>/', views.duplicar_pagamento, name='duplicar_pagamento'),
 
     path('recebimentos/', views.recebimentos, name='recebimentos'),
     path('recebimentos/adicionar', views.adicionar_recebimento, name='adicionar_recebimento'),
     path('recebimentos/editar/<recebimento_id>/', views.editar_recebimento, name='editar_recebimento'),
     path('recebimento/deletar/<recebimento_id>/', views.deletar_recebimento, name='deletar_recebimento'),
+    path('duplicar_recebimento/<int:recebimento_id>/', views.duplicar_recebimento, name='duplicar_recebimento'),
 ]
