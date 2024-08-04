@@ -175,6 +175,15 @@ def home(request):
 
     total_lucro_liquido = sum(lucro['lucro_liquido'] for lucro in lucro_liquido_por_loja.values())
 
+    # Defina lucro_percentual com um valor padrão
+    lucro_percentual = 0
+    for loja_nome in lojas_permitidas_nomes:
+        total_receitas = Recebimento.objects.filter(loja=loja_nome).aggregate(total=Sum('valor'))['total'] or 0
+        total_custos = Pagamento.objects.filter(loja=loja_nome).aggregate(total=Sum('valor'))['total'] or 0
+        lucro_liquido = total_receitas - total_custos
+
+        lucro_percentual = (lucro_liquido / total_receitas * 100) if total_receitas > 0 else 0
+
     dados_json = json.dumps({
         'receitasPorLoja': receitas_por_loja,
         'custosPorLoja': custos_por_loja,
