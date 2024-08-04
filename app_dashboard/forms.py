@@ -168,7 +168,7 @@ class PagamentoForm(forms.ModelForm):
         model = Pagamento
         fields = '__all__'
         widgets = {
-            # 'loja': forms.Select(choices=[(loja.id, loja.nome) for loja in Loja.objects.all()], attrs={'class': 'form-control'}),
+            'loja': forms.Select(choices=[(loja.id, loja.nome) for loja in Loja.objects.all()], attrs={'class': 'form-control'}),
             'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
             'data_pagamento': forms.DateInput(attrs={'type': 'date'})
         }
