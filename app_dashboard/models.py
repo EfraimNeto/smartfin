@@ -81,7 +81,7 @@ class Loja(models.Model):
     
 class UsuarioPerfil(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
-    # lojas = models.ManyToManyField(Loja, blank=True, related_name='usuarios')
+    lojas = models.ManyToManyField(Loja, blank=True, related_name='usuarios')
 
     def __str__(self):
         return self.user.username
