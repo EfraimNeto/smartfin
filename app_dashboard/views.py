@@ -799,7 +799,7 @@ def centro_custo_view(request):
 
     # Passar todos os centros de custo existentes para o template
     centros_custo = CentroCusto.objects.all()
-    return render(request, 'centro_custo.html', {'title': 'Centro de Custo', 'form': form, 'centros_custo': centros_custo})
+    return render(request, 'centro_custo/centro_custo.html', {'title': 'Centro de Custo', 'form': form, 'centros_custo': centros_custo})
 
 @superuser_or_staff_required
 @login_required
