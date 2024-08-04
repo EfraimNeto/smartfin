@@ -17,19 +17,19 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Documento</th>
-                            <th>Cidade</th>
-                            <th>Opções</th>
+                            <th style="text-align: center; text-transform: uppercase;">Nome</th>
+                            <th style="text-align: center; text-transform: uppercase;">Documento</th>
+                            <th style="text-align: center; text-transform: uppercase;">Cidade</th>
+                            <th style="text-align: center; text-transform: uppercase;">Opções</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for fornecedor in fornecedores %}
                             <tr>
-                                <td>{{ fornecedor.nome }}</td>
-                                <td>{{ fornecedor.documento }}</td>
-                                <td>{{ fornecedor.cidade }}</td>
-                                <td>
+                                <td style="text-align: center;">{{ fornecedor.nome }}</td>
+                                <td style="text-align: center;">{{ fornecedor.documento }}</td>
+                                <td style="text-align: center;">{{ fornecedor.cidade }}</td>
+                                <td style="text-align: center;">
                                     <div class="dropdown">
                                         <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
                                         Opções

@@ -1,5 +1,5 @@
 from django import forms
-from app_dashboard.models import Fornecedor, Cliente, Recebimento, Pagamento
+from app_dashboard.models import Fornecedor, Cliente, Recebimento, Pagamento, Loja, UsuarioPerfil, CentroCusto
 
 from django.contrib.auth.models import User
 
@@ -37,6 +37,11 @@ class EditFornecedorForm(forms.ModelForm):
 
 
 class UsuarioForm(forms.ModelForm):
+    lojas = forms.ModelMultipleChoiceField(
+        queryset=Loja.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
     
     class Meta:
         model = User
@@ -54,8 +59,23 @@ class UsuarioForm(forms.ModelForm):
             'password': forms.widgets.PasswordInput
         }
 
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.set_password(self.cleaned_data['password'])
+            user.save()
+            perfil, created = UsuarioPerfil.objects.get_or_create(user=user)
+            perfil.lojas.set(self.cleaned_data.get('lojas', []))
+            perfil.save()
+        return user
+
 
 class EditUsuarioForm(forms.ModelForm):
+    lojas = forms.ModelMultipleChoiceField(
+        queryset=Loja.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
 
     class Meta:
         model = User
@@ -68,6 +88,22 @@ class EditUsuarioForm(forms.ModelForm):
             'is_staff',
             'is_active'
         ]
+
+    def __init__(self, *args, **kwargs):
+        # Passar o perfil do usuário para o formulário
+        perfil = kwargs.pop('perfil', None)
+        super().__init__(*args, **kwargs)
+        if perfil:
+            self.fields['lojas'].initial = perfil.lojas.all()
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            perfil, created = UsuarioPerfil.objects.get_or_create(user=user)
+            perfil.lojas.set(self.cleaned_data.get('lojas', []))
+            perfil.save()
+        return user
 
 
 class clientesForm(forms.ModelForm):
@@ -132,6 +168,7 @@ class PagamentoForm(forms.ModelForm):
         model = Pagamento
         fields = '__all__'
         widgets = {
+            'loja': forms.Select(choices=[(loja.id, loja.nome) for loja in Loja.objects.all()], attrs={'class': 'form-control'}),
             'data_vencimento': forms.widgets.DateInput(attrs={'type': 'date'}),
             'data_pagamento': forms.DateInput(attrs={'type': 'date'})
         }
@@ -148,3 +185,36 @@ class EditPagamentoForm(forms.ModelForm):
             'data_pagamento': forms.DateInput(attrs={'type': 'date'}),
             'valor': forms.NumberInput(attrs={'step': '0.01'}),  # Configuração para campos decimais
         }
+
+class LojaForm(forms.ModelForm):
+    class Meta:
+        model = Loja
+        fields = ['nome']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+    
+    def clean_nome(self):
+        nome = self.cleaned_data.get('nome')
+        # Formatar o nome: Primeira letra maiúscula e demais minúsculas
+        nome_formatado = nome.capitalize().strip()
+        # Remover caracteres especiais e acentos
+        nome_formatado = nome_formatado.replace('ç', 'c')
+        return nome_formatado
+    
+
+class CentroCustoForm(forms.ModelForm):
+    class Meta:
+        model = CentroCusto
+        fields = ['nome']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+    
+    def clean_nome(self):
+        nome = self.cleaned_data.get('nome')
+        # Formatar o nome: Primeira letra maiúscula e demais minúsculas
+        nome_formatado = nome.capitalize().strip()
+        # Remover caracteres especiais e acentos
+        nome_formatado = nome_formatado.replace('ç', 'c')
+        return nome_formatado

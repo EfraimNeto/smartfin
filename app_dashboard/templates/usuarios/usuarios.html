@@ -3,9 +3,9 @@
 {% block conteudo %}
 <style>
     /* Adiciona rolagem horizontal para tabelas em telas pequenas */
-.table-responsive {
-    overflow-x: auto;
-}
+    .table-responsive {
+        overflow-x: auto;
+    }
 </style>
     <a href="{% url 'adicionar_user' %}" class="btn btn-primary mb-3">
         <span class="fas fa-plus mr-1"></span>
@@ -17,25 +17,35 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Opções</th>
+                            <th style="text-align: center; text-transform: uppercase;">Nome</th>
+                            <th style="text-align: center; text-transform: uppercase;">Email</th>
+                            <th style="text-align: center; text-transform: uppercase;">Visão</th>
+                            <th style="text-align: center; text-transform: uppercase;">Opções</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for Usuario in usuarios %}
+                        {% for usuario in usuarios %}
                             <tr>
-                                <td>{{ Usuario.username }}</td>
-                                <td>{{ Usuario.email }}</td>
-                                <td>
+                                <td style="text-align: center;">{{ usuario.username }}</td>
+                                <td style="text-align: center;">{{ usuario.email }}</td>
+                                <td style="text-align: center;">
+                                    {% if usuario.perfil.lojas.all %}
+                                        {% for loja in usuario.perfil.lojas.all %}
+                                            <span class="badge badge-info">{{ loja.nome|upper }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="badge badge-secondary">Nenhuma loja</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
                                     <div class="dropdown">
                                         <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
                                         Opções
                                         </button>
                                         <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{% url 'editar_user' Usuario.id %}">Editar</a>
-                                        <a class="dropdown-item" href="{% url 'alterar_senha_user' Usuario.id %}">Alterar Senha</a>
-                                        <a class="dropdown-item" href="{% url 'deletar_user' Usuario.id %}" data-toggle="delete-modal">Deletar</a>
+                                            <a class="dropdown-item" href="{% url 'editar_user' usuario.id %}">Editar</a>
+                                            <a class="dropdown-item" href="{% url 'alterar_senha_user' usuario.id %}">Alterar Senha</a>
+                                            <a class="dropdown-item" href="{% url 'deletar_user' usuario.id %}" data-toggle="delete-modal">Deletar</a>
                                         </div>
                                     </div>
                                 </td>
@@ -48,49 +58,39 @@
     </div>
 
     <!-- Modal de Confirmação de Deleção -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Você tem certeza de que deseja deletar este usuário?
-            </div>
-            <div class="modal-footer">
-                <a href="#" id="confirm-delete-btn" class="btn btn-danger">Deletar</a>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Você tem certeza de que deseja deletar este usuário?
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="confirm-delete-btn" class="btn btn-danger">Deletar</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var duplicateLinks = document.querySelectorAll('.dropdown-item[data-toggle="duplicate-modal"]');
-        var deleteLinks = document.querySelectorAll('.dropdown-item[data-toggle="delete-modal"]');
-        var confirmDuplicateBtn = document.getElementById('confirm-duplicate-btn');
-        var confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-        
-        duplicateLinks.forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                var url = this.getAttribute('href');
-                $('#confirmDuplicateModal').modal('show');
-                confirmDuplicateBtn.setAttribute('href', url);
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var deleteLinks = document.querySelectorAll('.dropdown-item[data-toggle="delete-modal"]');
+            var confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            
+            deleteLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var url = this.getAttribute('href');
+                    $('#confirmDeleteModal').modal('show');
+                    confirmDeleteBtn.setAttribute('href', url);
+                });
             });
         });
-        
-        deleteLinks.forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                var url = this.getAttribute('href');
-                $('#confirmDeleteModal').modal('show');
-                confirmDeleteBtn.setAttribute('href', url);
-            });
-        });
-    });
     </script>
 {% endblock %}

@@ -37,4 +37,11 @@ urlpatterns = [
     path('recebimentos/editar/<recebimento_id>/', views.editar_recebimento, name='editar_recebimento'),
     path('recebimento/deletar/<recebimento_id>/', views.deletar_recebimento, name='deletar_recebimento'),
     path('duplicar_recebimento/<int:recebimento_id>/', views.duplicar_recebimento, name='duplicar_recebimento'),
+
+    path('atualizar-vencimentos/', views.atualizar_vencimentos, name='atualizar_vencimentos'),
+    path('404/', views.superuser_or_staff_required, name='404'),
+    path('criar-loja/', views.criar_loja, name='criar_loja'),
+    path('excluir-loja/<int:loja_id>/', views.excluir_loja, name='excluir_loja'),
+    path('centro-custo/', views.centro_custo_view, name='centro_custo'),
+    path('centro-custo/excluir/<int:centro_id>/', views.excluir_centro_custo, name='excluir_centro_custo'),
 ]

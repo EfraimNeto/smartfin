@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 RECEBIMENTO_STATUS = [
     ('pendente', 'Pendente'),
@@ -40,6 +41,50 @@ CENTRO_CUSTO_CHOICES = [
     ('Sistema', 'Sistema'),
     ('Tarifa', 'Tarifa'),
 ]
+
+
+class CentroCusto(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+
+    def clean(self):
+        # Validar se o nome está em CENTRO_CUSTO_CHOICES
+        if self.nome.upper() not in dict(CENTRO_CUSTO_CHOICES).keys():
+            # Adicione validação adicional se necessário
+            pass
+
+    def save(self, *args, **kwargs):
+        # Formatar o nome: Primeira letra maiúscula e demais minúsculas
+        self.nome = self.nome.capitalize().strip()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.nome
+
+class Loja(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+
+    def clean(self):
+        # Validar se o nome está em LOJA_CHOICES
+        if self.nome.upper() not in dict(LOJA_CHOICES).keys():
+            # Adicione validação adicional se necessário
+            pass
+
+    def save(self, *args, **kwargs):
+        # Formatar o nome: Primeira letra maiúscula e demais minúsculas
+        self.nome = self.nome.capitalize().strip()
+        # Remover caracteres especiais e acentos
+        self.nome = self.nome.replace('ç', 'c')
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.nome
+    
+class UsuarioPerfil(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    lojas = models.ManyToManyField(Loja, blank=True, related_name='usuarios')
+
+    def __str__(self):
+        return self.user.username
 
 class Fornecedor(models.Model):
     nome = models.CharField(max_length=120, verbose_name='Nome')
