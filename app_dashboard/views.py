@@ -776,7 +776,7 @@ def criar_loja(request):
 
     # Passar todas as lojas existentes para o template
     lojas = Loja.objects.all()
-    return render(request, 'criar_loja.html', {'title': 'Criar Loja', 'form': form, 'lojas': lojas})
+    return render(request, 'loja/criar_loja.html', {'title': 'Criar Loja', 'form': form, 'lojas': lojas})
 
 @superuser_or_staff_required
 @login_required
